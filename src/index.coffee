@@ -15,7 +15,7 @@ port = process.env.PORT or 3000
 users = new Users
 flat = new Flat
 
-locales = ['en', 'ru']
+locales = ['en']
 
 i18n.configure
     locales: locales,
