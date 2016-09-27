@@ -1,0 +1,22 @@
+{
+	"title": "Paranoid-Room",
+	"keywords": "Chat, AES, encrypted, free, open, online, cipher",
+	"leave": "Leave Room",
+	"typeHere": "Type message here...",
+	"welcome": "Welcome to Paranoid-Room!",
+	"goal1": "This Website were coded to be user-friendly and extreamely secure at the same time with Client-Side AES encryption.",
+	"goal2": "Your messages will NOT be stored on the server.",
+	"goal3": "For the source code of this website follow <a href=\"https://github.com/GrayHatSecurityOfficialRepository/paranoid-room\" target=\"_blank\">this URL</a>.",
+	"signin": "Create a paranoid room",
+	"formRoom": "Room",
+	"formNick": "Nickname",
+	"formPassword": "Password",
+	"formRemember": "Remember username and room",
+	"formJoin": "Join!",
+	"joinError": "The room exists and password is not valid. Choose other room or enter a valid password.",
+	"iSaid": "I said: ",
+	"said": " said: ",
+	"me": "Me",
+    "en": "English",
+    "useHTTPS": "Go to the secure connection"
+}

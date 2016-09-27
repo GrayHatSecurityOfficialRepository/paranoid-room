@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.1/css/bootstrap.min.css">
+    <title><%= i18n('title') %></title>
+    <meta name="keywords" content="<%= i18n('keywords') %>"/>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <meta name="msapplication-TileColor" content="#603cba">
+    <style>
+        body {
+            color: #575252;
+            font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+        }
+        .btn:focus, .btn:focus:active {
+            outline: none;
+        }
+        .chat-list {
+            height: 100%;
+        }
+        .chat, .login, .wrap-main, body, html {
+            height: 100%;
+            min-height: 100%;
+            max-height: 100%;
+        }
+        .status {
+            position: fixed;
+            top: 6px;
+            left: 6px;
+            border-radius: 3px;
+            height: 6px;
+            width: 6px;
+            background-color: #c4c6c6;
+        }
+        .status.connected {
+            background-color: rgba(109, 208, 0, 0.77);
+        }
+        .wrap-main .chat, .login {
+            display: none;
+        }
+        .wrap-main.logged-in .login {
+            display: none;
+        }
+        .wrap-main.logged-in .chat, .wrap-main.not-logged-in .login {
+            display: block;
+        }
+        .login {
+            padding-top: 40px;
+        }
+        .chat-list-wrap {
+            overflow-y: scroll;
+            height: 100%;
+            margin-right: -10px;
+        }
+        .chat-list {
+            height: 100%;
+            width: 100%;
+            padding-bottom: 55px;
+            margin-left: -250px;
+            padding-left: 250px;
+            padding-right: 0;
+        }
+        .chat-list ul {
+            margin: 10px;
+        }
+        .msg-prefix {
+            color: #3c3535;
+        }
+        .msg-time {
+            color: #aaa;
+            margin-right: 5px;
+        }
+        .wrap-chat-form {
+            height: 50px;
+            position: fixed;
+            bottom: 0;
+            right: 10px;
+            left: 260px;
+        }
+        .wrap-chat-form form {
+            margin: 0 15px 0 5px;
+        }
+        .wrap-chat-form * {
+            height: 100%;
+            min-height: 100%;
+        }
+        .users-list {
+            min-height: 100%;
+            width: 240px;
+            z-index: 10000;
+            border-right: 1px solid #E2E2E2;
+        }
+        .users-list li {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 240px;
+            white-space: nowrap;
+        }
+        .room-name {
+            width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .textarea-wrap {
+            display: inline-block;
+            width: 100%;
+        }
+        .textarea-wrap textarea {
+            padding: 2px 4px;
+        }
+        #message {
+            width: 100%;
+            margin: 0;
+            display: inline-block;
+            height: 100%;
+            max-height: 100%;
+            min-height: 100%;
+            font-size: 14px;
+            line-height: 16px;
+            border-color: #E2E2E2;
+        }
+        #message:focus {
+            -webkit-box-shadow: none;
+            -moz-box-shadow: none;
+            box-shadow: none;
+            border-radius: 3px;
+        }
+        .page-header {
+            text-align: center;
+            margin-top: 0;
+        }
+        .page-header h1 {
+            margin-top: 0;
+        }
+        .form-signin {
+            max-width: 330px;
+            padding: 15px;
+            margin: 0 auto 60px;
+        }
+        .form-signin .form-signin-heading {
+            margin: 10px 0;
+            font-weight: 100;
+            text-align: center;
+        }
+        .form-signin .checkbox {
+            margin: 0;
+            text-align: center;
+        }
+        .form-signin .checkbox label {
+            padding: 10px 10px 10px 20px;
+            display: block;
+        }
+        .form-signin .checkbox label:hover span, .form-signin input[type="checkbox"]:focus + span {
+            border-bottom: 1px dotted;
+        }
+        .form-signin .checkbox {
+            font-weight: normal;
+        }
+        .form-signin .form-control {
+            position: relative;
+            height: auto;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .form-signin .form-control:focus {
+            z-index: 2;
+        }
+        .form-signin input.room {
+            margin-bottom: -1px;
+            border-bottom-right-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        .form-signin input.nick {
+            margin-bottom: -1px;
+            border-radius: 0;
+        }
+        .form-signin input[type="password"] {
+            margin-bottom: 0;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+        .form-signin .text-danger {
+            color: #a94442;
+        }
+        .langs {
+            float: right;
+            margin-top: -30px;
+        }
+        .use-https {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            text-align: center;
+        }
+        .use-https a {
+            padding: 0 6px 3px 6px;
+            box-shadow: 0 1px 1px 0 rgb(103, 186, 103);
+            border-radius: 3px;
+            color: #888888
+        }
+        .use-https a:hover,.use-https a:focus {
+            color: #288332;
+            text-decoration: underline;
+        }
+        @media screen and (max-width: 700px) {
+            .users-list {
+                width: 140px;
+            }
+            .users-list li {
+                width: 140px;
+            }
+            .chat-list {
+                margin-left: -150px;
+                padding-left: 150px;
+            }
+            .room-name {
+                width: 150px;
+            }
+            .wrap-chat-form {
+                left: 160px;
+            }
+            .msg-time {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="status"></div>
+<div class="use-https">
+    <a href="<%= httpURL %>"><%= i18n('useHTTPS') %></a>
+</div>
+<div class="container-fluid wrap-main">
+        <div class="row wrap-users-list chat">
+            <div class="col-md-3 col-sm-3 col-xs-3 users-list">
+                <div class="room-name"></div>
+                <a href="#" class="logout"><%= i18n('leave') %></a>
+                <ul class="list-unstyled">
+
+                </ul>
+            </div>
+            <div class="col-md-9 col-xs-9 col-sm-9 chat-list">
+
+                <div class="chat-list-wrap">
+                    <ul class="list-unstyled">
+
+                    </ul>
+                </div>
+                <div class="row wrap-chat-form">
+                    <form onsubmit="return false;" class="form-inline">
+                        <div class="textarea-wrap">
+                            <textarea class="form-control" id="message" placeholder="<%= i18n('typeHere') %>"></textarea>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    <div class="login">
+        <div class="langs">
+            <% locales.forEach(function (l) { %>
+            <a href="/<%= l %>/"><%= i18n(l) %></a>
+            <% }) %>
+        </div>
+
+        <div class="page-header">
+            <h1><%= i18n('welcome') %></h1>
+            <div class="goals">
+                <ul class="list-unstyled">
+                    <li>
+                        <%- i18n('goal1') %>
+                    </li>
+                    <li>
+                        <%- i18n('goal2') %>
+
+                    </li>
+                    <li>
+                        <%- i18n('goal3') %>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+        <form class="form-signin" role="form">
+            <h2 class="form-signin-heading"><%= i18n('signin') %></h2>
+            <label for="inputRoom" class="sr-only"><%= i18n('formRoom') %></label>
+            <input type="text" tabindex="1" id="inputRoom" class="form-control room" placeholder="<%= i18n('formRoom') %>" required="on" autocomplete="off" autofocus="on">
+            <label for="inputNick" class="sr-only"><%= i18n('formNick') %></label>
+            <input type="text" tabindex="2"  id="inputNick" class="form-control nick" placeholder="<%= i18n('formNick') %>" autocomplete="off" required="on">
+            <label for="inputPassword" class="sr-only"><%= i18n('formPassword') %></label>
+            <input type="password" tabindex="3"  id="inputPassword" class="form-control password" placeholder="<%= i18n('formPassword') %>" autocomplete="off" required="on">
+            <div class="checkbox">
+                <label>
+                    <input tabindex="4"  type="checkbox" value="remember-me" class="remember"> <span><%= i18n('formRemember') %></span>
+                </label>
+            </div>
+            <button class="btn btn-lg btn-default btn-block" type="submit"><%= i18n('formJoin') %></button>
+            <span id="helpBlock" class="help-block text-danger hide">
+                <%= i18n('joinError') %>
+            </span>
+        </form>
+
+        
+    </div>
+</div>
+
+<script>
+    if(location.protocol.indexOf('https') !== -1) {
+        document.querySelector('.use-https').style.display = 'none'
+    }
+</script>
+<script src="//cdn.socket.io/socket.io-1.2.0.js"></script>
+<script>
+    (function () {
+        if (!io) {
+            var my_awesome_script = document.createElement('script');
+            my_awesome_script.setAttribute('src','/socket.io/socket.io.js');
+            document.head.appendChild(my_awesome_script);
+        }
+    })();
+</script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.1/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/sha3.js"></script>
+
+<script>
+    console.timeEnd('loading')
+    $(function () {
+        var connected = false;
+        var $main = $('.wrap-main');
+        var me = null;
+        messages = [];
+        password = void 0;
+        socket = io();
+        socket.on('joinedUser', function (user) {
+            if (!me || user.id === me.id) {
+                return;
+            }
+            var li = $("<li>").text(user.name).attr('data-id', user.id);
+            $('.users-list ul').append(li)
+        });
+
+        socket.on('joined', function (data) {
+            $main.addClass('logged-in');
+            $main.removeClass('not-logged-in');
+            $('.form-signin .text-danger').addClass('hide');
+            console.log('joined');
+            var users = data.users;
+            me = data.me;
+            console.log('joined', data);
+            $('.room-name').text(data.room);
+            $('.users-list ul').empty();
+            $.each(users, function(index, user) {
+                var li = $("<li>").text(user.name).attr('data-id', user.id);
+                if (user.id === data.me.id) {
+                    li.text('<%= i18n('me') %> (' + user.name + ')')
+                }
+                $('.users-list ul').append(li)
+            });
+            $('textarea').focus();
+        });
+
+        socket.on('message', function (data) {
+            messages.push(data);
+            receivedMessage(data);
+        });
+
+        socket.on('joinFailed', function () {
+            console.log('join failed');
+            $('.form-signin .text-danger').removeClass('hide');
+            sessionStorage.removeItem('pass');
+        });
+
+        socket.on('connect', function () {
+            connected = true;
+            $('.status').addClass('connected');
+            join();
+        });
+
+
+        socket.on('disconnect', function () {
+            connected = false;
+            console.log('disconnect');
+            $('.status').removeClass('connected');
+            $('.chat-list ul').empty();
+            messages = [];
+        });
+
+        socket.on('disconnected', function (user) {
+            console.log('disconnected', user);
+            $('.users-list').find('li[data-id="$1"]'.replace("$1", user.id)).remove()
+        });
+
+        socket.on('getOldMessages', function () {
+            console.log('getOldMessages', messages.length);
+            socket.emit('oldMessages', messages);
+        });
+
+        socket.on('oldMessages', function (msgs) {
+            console.log('oldMessages', msgs.length);
+            msgs.reverse();
+            msgs.forEach(function (m) {messages.unshift(m);receivedMessage(m, true);})
+        });
+
+        $('#message').keyup(function (e) {
+            if (e.which === 13) {// Enter pressed
+                sendSocketMessage(encrypt(e.currentTarget.value));
+                e.currentTarget.value = '';
+            }
+        });
+        $('.logout').on('click', function () {
+            sessionStorage.clear();
+            location.reload()
+        });
+
+        var room = sessionStorage.getItem('room') || localStorage.getItem('room');
+        var username = sessionStorage.getItem('username') || localStorage.getItem('username');
+        var pass = sessionStorage.getItem('pass');
+        var remember = localStorage.getItem('remember');
+        if (pass && room && username) {
+            initialize(room, username, pass);
+        }
+        $main.addClass('not-logged-in');
+        $('.room').val(room);
+        $('.nick').val(username);
+        $('.password').val(pass);
+        if (remember) {
+            $('.remember').attr('checked', 'checked');
+        }
+        $('.form-signin').on('submit', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            room = $.trim($('.room').val());
+            username = $.trim($('.nick').val());
+            pass = $.trim($('.password').val());
+            var save = $('.remember').is(':checked');
+            if (save) {
+                localStorage.setItem('room', room);
+                localStorage.setItem('username', username);
+            }
+            else {
+                localStorage.removeItem('room');
+                localStorage.removeItem('username');
+            }
+            localStorage.setItem('remember', (save ? '1': ''));
+            sessionStorage.setItem('room', room);
+            sessionStorage.setItem('username', username);
+            sessionStorage.setItem('pass', pass);
+            initialize(room, username, pass);
+
+        });
+
+        function initialize(room, username, pass) {
+            password = pass;
+            console.log(room, username, password);
+            if (room.length === 0 || username.length === 0 || password.length === 0) {
+                return;
+            }
+            if (connected) {
+                join();
+            }
+        }
+
+        function receivedMessage (data, prepend) {
+            console.log('message', data);
+            var li = $('<li>')
+                    .append($("<span class='msg-time'>").text(formatDate(new Date(data.date))))
+                    .append($("<span class='msg-prefix'>").text(data.author.name + " <%= i18n('said') %> "))
+                    .append($("<span class='msg-body'>").text(decrypt(data.message)));
+            if (data.author.id === me.id) {
+                li.addClass('my-message').find('.msg-prefix').text("<%= i18n('iSaid') %>");
+            }
+            $('.chat-list ul')[prepend ? 'prepend': 'append'](li);
+            var scroller = $('.chat-list-wrap');
+            var height = scroller[0].scrollHeight - $(scroller).height();
+            $(scroller).stop().animate({ scrollTop: height }, 200);
+        }
+
+        function sendSocketMessage(msg) {
+            socket.emit('sendMessage', {message: msg});
+        }
+
+        function fillZero (number) {
+            if (number.toString().length === 1) {
+                number = "0" + number
+            }
+            return number;
+        }
+
+        function formatDate (date) {
+            return "Y/M/D h:m:s".
+                    replace("Y", date.getFullYear()).
+                    replace("M", fillZero(date.getMonth() + 1)).
+                    replace("D", fillZero(date.getDate())).
+                    replace("h", fillZero(date.getHours())).
+                    replace("m", fillZero(date.getMinutes())).
+                    replace("s", fillZero(date.getSeconds()));
+        }
+
+
+        var JsonFormatter = {
+            stringify: function (cipherParams) {
+                var jsonObj = {
+                    ct: cipherParams.ciphertext.toString(CryptoJS.enc.Base64)
+                };
+                if (cipherParams.iv) {
+                    jsonObj.iv = cipherParams.iv.toString();
+                }
+                if (cipherParams.salt) {
+                    jsonObj.s = cipherParams.salt.toString();
+                }
+                return JSON.stringify(jsonObj);
+            },
+            parse: function (jsonStr) {
+                var jsonObj = JSON.parse(jsonStr);
+                var cipherParams = CryptoJS.lib.CipherParams.create({
+                    ciphertext: CryptoJS.enc.Base64.parse(jsonObj.ct)
+                });
+                if (jsonObj.iv) {
+                    cipherParams.iv = CryptoJS.enc.Hex.parse(jsonObj.iv)
+                }
+                if (jsonObj.s) {
+                    cipherParams.salt = CryptoJS.enc.Hex.parse(jsonObj.s)
+                }
+                return cipherParams;
+            }
+        };
+
+        function decrypt (str) {
+            return CryptoJS.AES.decrypt(str, password, { format: JsonFormatter }).toString(CryptoJS.enc.Utf8);
+        }
+
+        function encrypt (str) {
+            return CryptoJS.AES.encrypt($.trim(str), password, { format: JsonFormatter }).toString();
+        }
+
+        function join() {
+            console.log('will join', username, room, password);
+            if (!room || !username || !password) {
+                return;
+            }
+            var verification = CryptoJS.SHA3(CryptoJS.SHA3(password).toString()).toString();
+            socket.emit('join', {room: room, username: username, verification: verification});
+        }
+
+
+    });
+</script>
+</body>
+</html>
